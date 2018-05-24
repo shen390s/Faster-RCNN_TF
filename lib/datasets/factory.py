@@ -81,7 +81,8 @@ for split in ['trainval']:
     name = 'cma_{}'.format(split)
     print name
     __sets[name] = (lambda split=split:
-            datasets.cma(split,'/Users/rshen/works/cma/data'))
+            datasets.cma(split,
+                         os.path.join(os.environ['HOME'],'/works/cma/data')))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
