@@ -19,7 +19,7 @@ if [ -d "$CUDA_PATH" ]; then
 		-lcudart -L $CUDA_PATH/lib64
 else
 	g++ -std=c++11 -shared -o roi_pooling.so roi_pooling_op.cc \
-		-I $TF_INC -fPIC $CXXFLAGS
+		-I $TF_INC -I$TF_INC/external/nsync/public/ -fPIC $CXXFLAGS
 fi
 
 cd ..

@@ -13,6 +13,7 @@ import datasets.pascal_voc
 import datasets.imagenet3d
 import datasets.kitti
 import datasets.kitti_tracking
+import datasets.cma
 import numpy as np
 
 def _selective_search_IJCV_top_k(split, year, top_k):
@@ -75,6 +76,12 @@ for split in ['71', '370']:
     __sets[name] = (lambda split=split:
             datasets.nthu(split))
 
+# cma dataset
+for split in ['trainval']:
+    name = 'cma_{}'.format(split)
+    print name
+    __sets[name] = (lambda split=split:
+            datasets.cma(split,'/Users/rshen/works/cma/data'))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
