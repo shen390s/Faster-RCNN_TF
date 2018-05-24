@@ -76,13 +76,19 @@ for split in ['71', '370']:
     __sets[name] = (lambda split=split:
             datasets.nthu(split))
 
+def get_cma_data_path():
+    cma_data_path = os.environ.get('CMA_DATA_PATH')
+    if cma_data_path == None:
+        cma_data_path = os.path.join(os.environ['HOME'],
+                                     '/works/cma/data')
+    return cma_data_path
+
 # cma dataset
 for split in ['trainval']:
     name = 'cma_{}'.format(split)
     print name
     __sets[name] = (lambda split=split:
-            datasets.cma(split,
-                         os.path.join(os.environ['HOME'],'/works/cma/data')))
+            datasets.cma(split, get_cma_data_path()))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
