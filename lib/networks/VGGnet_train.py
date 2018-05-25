@@ -3,8 +3,8 @@ from networks.network import Network
 
 
 #define
-
-n_classes = 21
+# FIXME: change n_classes according data source
+n_classes = 5
 _feat_stride = [16,]
 anchor_scales = [8, 16, 32]
 
