@@ -9,6 +9,7 @@
 
 __sets = {}
 
+import os
 import datasets.pascal_voc
 import datasets.imagenet3d
 import datasets.kitti
@@ -79,8 +80,7 @@ for split in ['71', '370']:
 def get_cma_data_path():
     cma_data_path = os.environ.get('CMA_DATA_PATH')
     if cma_data_path == None:
-        cma_data_path = os.path.join(os.environ['HOME'],
-                                     '/works/cma/data')
+        cma_data_path = os.environ['HOME'] + '/works/cma/data'
     return cma_data_path
 
 # cma dataset
