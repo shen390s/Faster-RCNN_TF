@@ -8,16 +8,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os, sys, cv2
 import argparse
+import csv
 from networks.factory import get_network
 
 
-CLASSES = ('__background__',
-           'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair',
-           'cow', 'diningtable', 'dog', 'horse',
-           'motorbike', 'person', 'pottedplant',
-           'sheep', 'sofa', 'train', 'tvmonitor')
-
+# FIXME: change following according dataset
+# CLASSES = ('__background__',
+#            'aeroplane', 'bicycle', 'bird', 'boat',
+#            'bottle', 'bus', 'car', 'cat', 'chair',
+#            'cow', 'diningtable', 'dog', 'horse',
+#            'motorbike', 'person', 'pottedplant',
+#            'sheep', 'sofa', 'train', 'tvmonitor')
+CLASSES = ('__background__', # always index 0
+           'a_line', 'b_whiteline', 'c_move', 'd_block')
 
 #CLASSES = ('__background__','person','bike','motorbike','car','bus')
 
@@ -96,10 +99,22 @@ def parse_args():
                         default='VGGnet_test')
     parser.add_argument('--model', dest='model', help='Model path',
                         default=' ')
+    parser.add_argument('--jpg', dest='jpg', help='Image for detect',
+                        default='')
 
     args = parser.parse_args()
 
     return args
+
+def parse_csv(line):
+    reader = csv.reader([line], delimiter=',')
+    xset = []
+    while True:
+        vs = list(reader)
+        if vs == []:
+            return xset
+        xset = xset + vs[0]
+
 if __name__ == '__main__':
     cfg.TEST.HAS_RPN = True  # Use RPN for proposals
 
@@ -107,7 +122,10 @@ if __name__ == '__main__':
 
     if args.model == ' ':
         raise IOError(('Error: Model not found.\n'))
-        
+
+    if args.jpg == '':
+        raise IOError(('Error: No image for detection'))
+
     # init session
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     # load network
@@ -125,13 +143,17 @@ if __name__ == '__main__':
     for i in xrange(2):
         _, _= im_detect(sess, net, im)
 
-    im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
-                '001763.jpg', '004545.jpg']
+#    im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
+#                '001763.jpg', '004545.jpg']
+#    im_names = ['/Users/rshen/works/cma/data/JPEGImages/FY2G_FDI_ALL_NOM_20180504_1300_5.jpg',
+#                '/Users/rshen/works/cma/data/JPEGImages/FY2G_FDI_ALL_NOM_20180504_0300_5.jpg']
 
+#    im_names = [args.jpg]
+    im_names = parse_csv(args.jpg)
 
     for im_name in im_names:
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Demo for data/demo/{}'.format(im_name)
+        print 'Demo for {}'.format(im_name)
         demo(sess, net, im_name)
 
     plt.show()
