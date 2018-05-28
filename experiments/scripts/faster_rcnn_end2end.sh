@@ -50,7 +50,12 @@ case $DATASET in
     ;;
 esac
 
-LOG="experiments/logs/faster_rcnn_end2end_${NET}_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
+LOG="output/logs/faster_rcnn_end2end_${NET}_${EXTRA_ARGS_SLUG}.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
+if [ ! -d `dirname $LOG` ]; then
+    mkdir -p `dirname $LOG`
+fi
+
+touch "$LOG"
 exec &> >(tee -a "$LOG")
 echo Logging output to "$LOG"
 

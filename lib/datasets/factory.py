@@ -84,7 +84,7 @@ def get_cma_data_path():
     return cma_data_path
 
 # cma dataset
-for split in ['trainval']:
+for split in ['trainval', 'test']:
     name = 'cma_{}'.format(split)
     print name
     __sets[name] = (lambda split=split:
