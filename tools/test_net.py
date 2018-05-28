@@ -67,9 +67,9 @@ if __name__ == '__main__':
     print('Using config:')
     pprint.pprint(cfg)
 
-    while not os.path.exists(args.model) and args.wait:
-        print('Waiting for {} to exist...'.format(args.model))
-        time.sleep(10)
+#    while not os.path.exists(args.model) and args.wait:
+#        print('Waiting for {} to exist...'.format(args.model))
+#        time.sleep(10)
 
     weights_filename = os.path.splitext(os.path.basename(args.model))[0]
 
