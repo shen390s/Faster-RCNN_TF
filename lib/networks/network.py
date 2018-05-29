@@ -184,6 +184,8 @@ class Network(object):
     def proposal_target_layer(self, input, classes, name):
         if isinstance(input[0], tuple):
             input[0] = input[0][0]
+
+        print "classes = ", classes
         with tf.variable_scope(name) as scope:
 
             rois,labels,bbox_targets,bbox_inside_weights,bbox_outside_weights = tf.py_func(proposal_target_layer_py,[input[0],input[1],classes],[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])

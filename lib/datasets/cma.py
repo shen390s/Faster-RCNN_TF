@@ -20,6 +20,13 @@ from voc_eval import voc_eval
 from fast_rcnn.config import cfg
 import pdb
 
+def ensure_direxist(pathname):
+    if os.path.exists(pathname):
+        return
+
+    ensure_direxist(os.path.dirname(pathname))
+    os.mkdir(pathname)
+    return
 
 class cma(imdb):
     def __init__(self, image_set, data_path):
@@ -27,7 +34,9 @@ class cma(imdb):
         self._image_set = image_set
         self._data_path = data_path
         self._classes = ('__background__', # always index 0
-                         'a_line', 'b_whiteline', 'c_move', 'd_block')
+                         'a_line', 'b_whiteline', 'c_move', 'd_block',
+                         'e_madian','f_liangtiao','g_duanceng', 'h_diuxian',
+                         'w','ww','z_black', 'z_white')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
         self._image_index = self._load_image_set_index()
@@ -224,6 +233,7 @@ class cma(imdb):
                 continue
             print 'Writing {} VOC results file'.format(cls)
             filename = self._get_cma_results_file_template().format(cls)
+            ensure_direxist(os.path.dirname(filename))
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
@@ -247,6 +257,7 @@ class cma(imdb):
             'Main',
             self._image_set + '.txt')
         cachedir = os.path.join(self._data_path, 'annotations_cache')
+        print 'Evaluation dataset ' + self._image_set
         aps = []
         # The CMA VOC metric changed in 2010
         use_07_metric = False

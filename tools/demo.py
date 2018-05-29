@@ -20,7 +20,9 @@ from networks.factory import get_network
 #            'motorbike', 'person', 'pottedplant',
 #            'sheep', 'sofa', 'train', 'tvmonitor')
 CLASSES = ('__background__', # always index 0
-           'a_line', 'b_whiteline', 'c_move', 'd_block')
+           'a_line', 'b_whiteline', 'c_move', 'd_block',
+           'e_madian','f_liangtiao','g_duanceng', 'h_diuxian',
+           'w','ww','z_black', 'z_white')
 
 #CLASSES = ('__background__','person','bike','motorbike','car','bus')
 
@@ -129,7 +131,7 @@ if __name__ == '__main__':
     # init session
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     # load network
-    net = get_network(args.demo_net)
+    net = get_network(args.demo_net, len(CLASSES))
     # load model
     saver = tf.train.Saver(write_version=tf.train.SaverDef.V1)
     saver.restore(sess, args.model)

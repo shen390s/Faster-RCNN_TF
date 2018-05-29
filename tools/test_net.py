@@ -79,7 +79,8 @@ if __name__ == '__main__':
     device_name = '/{}:{:d}'.format(args.device,args.device_id)
     print device_name
 
-    network = get_network(args.network_name)
+    network = get_network(args.network_name,
+                          imdb.num_classes)
     print 'Use network `{:s}` in training'.format(args.network_name)
 
     if args.device == 'gpu':

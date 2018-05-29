@@ -69,7 +69,7 @@ class xdataset(object):
             os.mkdir(dir)
 
         for filename, dset in [("trainval.txt", self._trainset),
-                               ("val.txt", self._valset),
+                               ("test.txt", self._valset),
                                ("inference.txt", self._inferset)]:
             file = open(os.path.join(dir, filename), "w")
             for x in dset:

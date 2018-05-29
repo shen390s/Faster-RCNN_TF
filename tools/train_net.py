@@ -80,6 +80,7 @@ if __name__ == '__main__':
         np.random.seed(cfg.RNG_SEED)
     imdb = get_imdb(args.imdb_name)
     print 'Loaded dataset `{:s}` for training'.format(imdb.name)
+
     roidb = get_training_roidb(imdb)
 
     output_dir = get_output_dir(imdb, None)
@@ -88,7 +89,8 @@ if __name__ == '__main__':
     device_name = '/{}:{:d}'.format(args.device,args.device_id)
     print device_name
 
-    network = get_network(args.network_name)
+    network = get_network(args.network_name,
+                          imdb.num_classes)
     print 'Use network `{:s}` in training'.format(args.network_name)
 
     train_net(network, imdb, roidb, output_dir,
