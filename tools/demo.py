@@ -10,6 +10,7 @@ import os, sys, cv2
 import argparse
 import csv
 from networks.factory import get_network
+from datasets.factory import get_imdb
 
 
 # FIXME: change following according dataset
@@ -56,7 +57,7 @@ def vis_detections(im, class_name, dets,ax, thresh=0.5):
     plt.draw()
 
 
-def demo(sess, net, image_name):
+def demo(sess, net, image_name, classes=CLASSES):
     """Detect object classes in an image using pre-computed object proposals."""
 
     # Load the demo image
@@ -103,6 +104,7 @@ def parse_args():
                         default=' ')
     parser.add_argument('--jpg', dest='jpg', help='Image for detect',
                         default='')
+    parser.add_argument("--imdb", dest="imdb",help='Dataset of model training')
 
     args = parser.parse_args()
 
@@ -127,6 +129,8 @@ if __name__ == '__main__':
 
     if args.jpg == '':
         raise IOError(('Error: No image for detection'))
+
+    imdb = get_imdb(args.imdb)
 
     # init session
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
@@ -156,7 +160,7 @@ if __name__ == '__main__':
     for im_name in im_names:
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
         print 'Demo for {}'.format(im_name)
-        demo(sess, net, im_name)
+        demo(sess, net, im_name, imdb.classes)
 
     plt.show()
 
