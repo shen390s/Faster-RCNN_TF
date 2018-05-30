@@ -18,6 +18,7 @@ import subprocess
 import uuid
 from voc_eval import voc_eval
 from fast_rcnn.config import cfg
+from lxml import etree
 import pdb
 
 def ensure_direxist(pathname):
@@ -27,6 +28,33 @@ def ensure_direxist(pathname):
     ensure_direxist(os.path.dirname(pathname))
     os.mkdir(pathname)
     return
+
+def recursive_parse_xml_to_dict(xml):
+    if len(xml) == 0:
+        return {xml.tag: xml.text}
+    result = {}
+    for child in xml:
+        child_result = recursive_parse_xml_to_dict(child)
+        if child.tag != 'object':
+            result[child.tag] = child_result[child.tag]
+        else:
+            if child.tag not in result:
+                result[child.tag] = []
+            result[child.tag].append(child_result[child.tag])
+    return {xml.tag: result}
+
+def get_class_list_from_ann_file(filename):
+    with open(filename, 'r') as f:
+        xml_str = f.read()
+
+    xml = etree.fromstring(xml_str)
+    classes = []
+    annotations = recursive_parse_xml_to_dict(xml)['annotation']
+    if annotations.has_key('object'):
+        for obj in annotations['object']:
+            classes.append(obj['name'])
+
+    return list(set(classes))
 
 class cma(imdb):
     def __init__(self, image_set, data_path):
@@ -40,7 +68,7 @@ class cma(imdb):
         else:
             self._classes = ('__background__', # always index 0
                              'a_line', 'b_whiteline', 'c_move', 'd_block',
-#                             'e_madian','f_liangtiao','g_duanceng', 'h_diuxian',
+                             'e_madian','f_liangtiao','g_duanceng', 'h_diuxian',
                              'w','ww','z_black', 'z_white')
 
         print "List of Classes:", self._classes
@@ -66,17 +94,18 @@ class cma(imdb):
                 'Path does not exist: {}'.format(self._data_path)
 
     def load_classname_list(self):
-        # using shell script to get list of class names
-        # this should be faster than parse annotation files
         annotation_path = os.path.join(self._data_path, 'Annotations')
-        with os.popen(
-                "egrep '<name>.*</name>' %s/*.xml |awk '{print $2}' |sed -e 's/<\/.*$//g' -e 's/^.*>//g' |sort |uniq" %
-                (annotation_path)) as f:
-            cls = ['__background__'] + ([n.split()[0] for n in f.readlines()])
+        z = os.walk(annotation_path)
+        classes = []
+        for _,_,filenames in z:
+            for n in filenames:
+                ann_file = os.path.join(annotation_path, n)
+                clsnames = get_class_list_from_ann_file(ann_file)
+                classes = list(set(classes + clsnames))
 
-            f.close()
+        classes = ['__background__'] + classes
 
-        return cls
+        return classes
 
     def image_path_at(self, i):
         """
