@@ -33,10 +33,18 @@ class cma(imdb):
         imdb.__init__(self, 'cma_' + image_set)
         self._image_set = image_set
         self._data_path = data_path
-        self._classes = ('__background__', # always index 0
-                         'a_line', 'b_whiteline', 'c_move', 'd_block',
-                         'e_madian','f_liangtiao','g_duanceng', 'h_diuxian',
-                         'w','ww','z_black', 'z_white')
+        # load name of classes from dataset
+        classes = self.load_classname_list()
+        if len(classes) > 0 :
+            self._classes = classes
+        else:
+            self._classes = ('__background__', # always index 0
+                             'a_line', 'b_whiteline', 'c_move', 'd_block',
+#                             'e_madian','f_liangtiao','g_duanceng', 'h_diuxian',
+                             'w','ww','z_black', 'z_white')
+
+        print "List of Classes:", self._classes
+
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
         self._image_index = self._load_image_set_index()
@@ -56,6 +64,19 @@ class cma(imdb):
 
         assert os.path.exists(self._data_path), \
                 'Path does not exist: {}'.format(self._data_path)
+
+    def load_classname_list(self):
+        # using shell script to get list of class names
+        # this should be faster than parse annotation files
+        annotation_path = os.path.join(self._data_path, 'Annotations')
+        with os.popen(
+                "egrep '<name>.*</name>' %s/*.xml |awk '{print $2}' |sed -e 's/<\/.*$//g' -e 's/^.*>//g' |sort |uniq" %
+                (annotation_path)) as f:
+            cls = ['__background__'] + ([n.split()[0] for n in f.readlines()])
+
+            f.close()
+
+        return cls
 
     def image_path_at(self, i):
         """
