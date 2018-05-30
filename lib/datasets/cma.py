@@ -19,6 +19,7 @@ import uuid
 from voc_eval import voc_eval
 from fast_rcnn.config import cfg
 from lxml import etree
+import fnmatch
 import pdb
 
 def ensure_direxist(pathname):
@@ -46,6 +47,7 @@ def recursive_parse_xml_to_dict(xml):
 def get_class_list_from_ann_file(filename):
     with open(filename, 'r') as f:
         xml_str = f.read()
+        f.close()
 
     xml = etree.fromstring(xml_str)
     classes = []
@@ -99,9 +101,10 @@ class cma(imdb):
         classes = []
         for _,_,filenames in z:
             for n in filenames:
-                ann_file = os.path.join(annotation_path, n)
-                clsnames = get_class_list_from_ann_file(ann_file)
-                classes = list(set(classes + clsnames))
+                if fnmatch.fnmatch(n,'*.xml'):
+                    ann_file = os.path.join(annotation_path, n)
+                    clsnames = get_class_list_from_ann_file(ann_file)
+                    classes = list(set(classes + clsnames))
 
         classes = ['__background__'] + classes
 
