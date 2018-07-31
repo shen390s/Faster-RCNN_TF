@@ -24,10 +24,11 @@ def get_network(name, nclass):
     #if not __sets.has_key(name):
     #    raise KeyError('Unknown dataset: {}'.format(name))
     #return __sets[name]
+    print 'get_network nclass = ',nclass
     if name.split('_')[1] == 'test':
-       return networks.VGGnet_test(nclass)
+       return networks.VGGnet_test(nclasses=nclass)
     elif name.split('_')[1] == 'train':
-       return networks.VGGnet_train(nclass)
+       return networks.VGGnet_train(nclasses=nclass)
     else:
        raise KeyError('Unknown dataset: {}'.format(name))
     

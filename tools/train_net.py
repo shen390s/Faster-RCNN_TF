@@ -89,6 +89,8 @@ if __name__ == '__main__':
     device_name = '/{}:{:d}'.format(args.device,args.device_id)
     print device_name
 
+    print 'imdb.num_classes = ',imdb.num_classes
+
     network = get_network(args.network_name,
                           imdb.num_classes)
     print 'Use network `{:s}` in training'.format(args.network_name)

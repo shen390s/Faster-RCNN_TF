@@ -11,6 +11,7 @@ anchor_scales = [8, 16, 32]
 class VGGnet_train(Network):
     def __init__(self, trainable=True, nclasses=13):
         self.nclasses = nclasses
+        print ' train nclasses = ', nclasses
         self.inputs = []
         self.data = tf.placeholder(tf.float32, shape=[None, None, None, 3])
         self.im_info = tf.placeholder(tf.float32, shape=[None, 3])
@@ -53,14 +54,18 @@ class VGGnet_train(Network):
         #========= RPN ============
         (self.feed('conv5_3')
              .conv(3,3,512,1,1,name='rpn_conv/3x3')
+             # prob for foreground/background for each anchor in feature space
+             # 3 is the len of aspect ratio array
              .conv(1,1,len(anchor_scales)*3*2 ,1 , 1, padding='VALID', relu = False, name='rpn_cls_score'))
 
         (self.feed('rpn_cls_score','gt_boxes','im_info','data')
              .anchor_target_layer(_feat_stride, anchor_scales, name = 'rpn-data' ))
 
         # Loss of rpn_cls & rpn_boxes
-
+        # bound box pred value for 9 anchors for every points in feature space
         (self.feed('rpn_conv/3x3')
+             # 4 value of (offset center of x and y in percent and w and h in log) for
+             # every anchor(total 9 anchors) for each point in feature map
              .conv(1,1,len(anchor_scales)*3*4, 1, 1, padding='VALID', relu = False, name='rpn_bbox_pred'))
 
         #========= RoI Proposal ============

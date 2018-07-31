@@ -14,12 +14,14 @@ from fast_rcnn.nms_wrapper import nms
 import pdb
 
 
-DEBUG = False
+DEBUG = True
 """
 Outputs object detection proposals by applying estimated bounding-box
 transformations to a set of regular boxes (called "anchors").
 """
-def proposal_layer(rpn_cls_prob_reshape,rpn_bbox_pred,im_info,cfg_key,_feat_stride = [16,],anchor_scales = [8, 16, 32]):
+def proposal_layer(rpn_cls_prob_reshape,rpn_bbox_pred,im_info,
+                   cfg_key,_feat_stride = [16,],
+                   anchor_scales = [8, 16, 32]):
     # Algorithm:
     #
     # for each (H, W) location i
@@ -35,8 +37,15 @@ def proposal_layer(rpn_cls_prob_reshape,rpn_bbox_pred,im_info,cfg_key,_feat_stri
     #layer_params = yaml.load(self.param_str_)
     _anchors = generate_anchors(scales=np.array(anchor_scales))
     _num_anchors = _anchors.shape[0]
+    if DEBUG:
+        print "Proposal Layer number of anchors: {}".format(_num_anchors)
+
     rpn_cls_prob_reshape = np.transpose(rpn_cls_prob_reshape,[0,3,1,2])
     rpn_bbox_pred = np.transpose(rpn_bbox_pred,[0,3,1,2])
+    if DEBUG:
+        print "Proposal Layer rpn_cls_prob_reshape shape: {}".format(rpn_cls_prob_reshape.shape)
+        print "Proposal Layer rpn_bbox_pred shape: {}".format(rpn_bbox_pred.shape)
+
     #rpn_cls_prob_reshape = np.transpose(np.reshape(rpn_cls_prob_reshape,[1,rpn_cls_prob_reshape.shape[0],rpn_cls_prob_reshape.shape[1],rpn_cls_prob_reshape.shape[2]]),[0,3,2,1])
     #rpn_bbox_pred = np.transpose(rpn_bbox_pred,[0,3,2,1])
     im_info = im_info[0]
@@ -57,14 +66,14 @@ def proposal_layer(rpn_cls_prob_reshape,rpn_bbox_pred,im_info,cfg_key,_feat_stri
     #im_info = bottom[2].data[0, :]
 
     if DEBUG:
-        print 'im_size: ({}, {})'.format(im_info[0], im_info[1])
-        print 'scale: {}'.format(im_info[2])
+        print 'Proposal Layer im_size: ({}, {})'.format(im_info[0], im_info[1])
+        print 'Proposal Layer scale: {}'.format(im_info[2])
 
     # 1. Generate proposals from bbox deltas and shifted anchors
     height, width = scores.shape[-2:]
 
     if DEBUG:
-        print 'score map size: {}'.format(scores.shape)
+        print 'Proposal Layer score map size: {}'.format(scores.shape)
 
     # Enumerate all shifts
     shift_x = np.arange(0, width) * _feat_stride
@@ -102,6 +111,8 @@ def proposal_layer(rpn_cls_prob_reshape,rpn_bbox_pred,im_info,cfg_key,_feat_stri
     scores = scores.transpose((0, 2, 3, 1)).reshape((-1, 1))
 
     # Convert anchors into proposals via bbox transformations
+    # Apply to all anchors 9*h*w (h is the height of feature map, w is the
+    # width of feature map)
     proposals = bbox_transform_inv(anchors, bbox_deltas)
 
     # 2. clip predicted boxes to image

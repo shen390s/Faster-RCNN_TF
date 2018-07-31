@@ -15,7 +15,7 @@ from utils.cython_bbox import bbox_overlaps
 from fast_rcnn.bbox_transform import bbox_transform
 import pdb
 
-DEBUG = False
+DEBUG = True
 
 def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, data, _feat_stride = [16,], anchor_scales = [4 ,8, 16, 32]):
     """
@@ -113,8 +113,10 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, data, _feat_stride = [
     overlaps = bbox_overlaps(
         np.ascontiguousarray(anchors, dtype=np.float),
         np.ascontiguousarray(gt_boxes, dtype=np.float))
+    # max overlapped ground-truth box for each anchor (filtered by inds_inside)
     argmax_overlaps = overlaps.argmax(axis=1)
     max_overlaps = overlaps[np.arange(len(inds_inside)), argmax_overlaps]
+    # max overlapped anchor for each ground-truth box
     gt_argmax_overlaps = overlaps.argmax(axis=0)
     gt_max_overlaps = overlaps[gt_argmax_overlaps,
                                np.arange(overlaps.shape[1])]
@@ -127,7 +129,8 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, data, _feat_stride = [
     # fg label: for each gt, anchor with highest overlap
     labels[gt_argmax_overlaps] = 1
 
-    # fg label: above threshold IOU
+    # fg label: above threshold IOU, not really IOU but the
+    # percentage of overlapped area to ground-truth box
     labels[max_overlaps >= cfg.TRAIN.RPN_POSITIVE_OVERLAP] = 1
 
     if cfg.TRAIN.RPN_CLOBBER_POSITIVES:
@@ -152,7 +155,12 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, im_info, data, _feat_stride = [
         #print "was %s inds, disabling %s, now %s inds" % (
             #len(bg_inds), len(disable_inds), np.sum(labels == 0))
 
+    # labels[] = 1, foreground
+    #            0, background
+    #           -1, disabled (not used) 
     bbox_targets = np.zeros((len(inds_inside), 4), dtype=np.float32)
+    # Generate transform information to transform anchor to max
+    # overlapped ground truth box
     bbox_targets = _compute_targets(anchors, gt_boxes[argmax_overlaps, :])
 
     bbox_inside_weights = np.zeros((len(inds_inside), 4), dtype=np.float32)

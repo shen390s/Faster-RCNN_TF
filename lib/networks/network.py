@@ -148,12 +148,14 @@ class Network(object):
         if isinstance(input[1], tuple):
             input[1] = input[1][0]
 
-        print input
-        return roi_pool_op.roi_pool(input[0], input[1],
-                                    pooled_height,
-                                    pooled_width,
-                                    spatial_scale,
-                                    name=name)[0]
+        print "RoI input[0] = ",input[0], " input [1]=  ", input[1],
+        output = roi_pool_op.roi_pool(input[0], input[1],
+                                      pooled_height,
+                                      pooled_width,
+                                      spatial_scale,
+                                      name=name)[0]
+        print "RoI output =", output
+        return output
 
     @layer
     def proposal_layer(self, input, _feat_stride, anchor_scales, cfg_key, name):
@@ -185,7 +187,6 @@ class Network(object):
         if isinstance(input[0], tuple):
             input[0] = input[0][0]
 
-        print "classes = ", classes
         with tf.variable_scope(name) as scope:
 
             rois,labels,bbox_targets,bbox_inside_weights,bbox_outside_weights = tf.py_func(proposal_target_layer_py,[input[0],input[1],classes],[tf.float32,tf.float32,tf.float32,tf.float32,tf.float32])

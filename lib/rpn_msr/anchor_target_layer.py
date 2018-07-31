@@ -15,7 +15,7 @@ from generate_anchors import generate_anchors
 from utils.cython_bbox import bbox_overlaps
 from fast_rcnn.bbox_transform import bbox_transform
 
-DEBUG = False 
+DEBUG = True 
 
 class AnchorTargetLayer(caffe.Layer):
     """
@@ -28,9 +28,9 @@ class AnchorTargetLayer(caffe.Layer):
         self._num_anchors = self._anchors.shape[0]
 
         if DEBUG:
-            print 'anchors:'
+            print 'Anchor Target Layer anchors:'
             print self._anchors
-            print 'anchor shapes:'
+            print 'Anchor Target Layer anchor shapes:'
             print np.hstack((
                 self._anchors[:, 2::4] - self._anchors[:, 0::4],
                 self._anchors[:, 3::4] - self._anchors[:, 1::4],
@@ -135,8 +135,10 @@ class AnchorTargetLayer(caffe.Layer):
                 np.ascontiguousarray(gt_boxes, dtype=np.float))
             argmax_overlaps = overlaps.argmax(axis=1)
             max_overlaps = overlaps[np.arange(len(inds_inside)), argmax_overlaps]
+            # max_overlaps is the max overlapped ground-truth box value for each anchor
             gt_argmax_overlaps = overlaps.argmax(axis=0)
             gt_max_overlaps = overlaps[gt_argmax_overlaps, np.arange(overlaps.shape[1])]
+            # gt_max_overlaps is the max overlapped anchor value for each ground-truth box
             gt_argmax_overlaps = np.where(overlaps == gt_max_overlaps)[0]
 
             if not cfg.TRAIN.RPN_CLOBBER_POSITIVES:

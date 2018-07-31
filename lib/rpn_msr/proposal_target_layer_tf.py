@@ -13,7 +13,7 @@ from fast_rcnn.bbox_transform import bbox_transform
 from utils.cython_bbox import bbox_overlaps
 import pdb
 
-DEBUG = False
+DEBUG = True
 
 def proposal_target_layer(rpn_rois, gt_boxes,_num_classes):
     """
@@ -33,6 +33,9 @@ def proposal_target_layer(rpn_rois, gt_boxes,_num_classes):
         (all_rois, np.hstack((zeros, gt_boxes[:, :-1])))
     )
 
+    _count = 0
+    _fg_num = 0
+    _bg_num = 0
     # Sanity check: single batch only
     assert np.all(all_rois[:, 0] == 0), \
             'Only single item batches are supported'
@@ -114,8 +117,10 @@ def _sample_rois(all_rois, gt_boxes, fg_rois_per_image, rois_per_image, num_clas
     overlaps = bbox_overlaps(
         np.ascontiguousarray(all_rois[:, 1:5], dtype=np.float),
         np.ascontiguousarray(gt_boxes[:, :4], dtype=np.float))
+    # assign ground-truth box for each RoI
     gt_assignment = overlaps.argmax(axis=1)
     max_overlaps = overlaps.max(axis=1)
+    # label for each RoI
     labels = gt_boxes[gt_assignment, 4]
 
     # Select foreground RoIs as those with >= FG_THRESH overlap
