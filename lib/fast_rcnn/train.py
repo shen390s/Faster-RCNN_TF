@@ -167,10 +167,12 @@ class SolverWrapper(object):
 
         # final loss
         loss = cross_entropy + loss_box + rpn_cross_entropy + rpn_loss_box
-        tf.summary.scalar('cross_entropy', cross_entropy)
-        tf.summary.scalar('loss_box', loss_box)
-        tf.summary.scalar('rpn_cross_entropy', rpn_cross_entropy)
-        tf.summary.scalar('rpn_cross_box', rpn_loss_box)
+
+        with tf.name_scope('Loss'):
+            tf.summary.scalar('cross_entropy', cross_entropy)
+            tf.summary.scalar('loss_box', loss_box)
+            tf.summary.scalar('rpn_cross_entropy', rpn_cross_entropy)
+            tf.summary.scalar('rpn_cross_box', rpn_loss_box)
 
         # optimizer and learning rate
         global_step = tf.Variable(0, trainable=False)
