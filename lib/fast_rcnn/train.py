@@ -40,6 +40,8 @@ class SolverWrapper(object):
 
         # For checkpoint
         self.saver = saver
+        self.summary_ops = None
+        self.summary_writer = None
 
     def snapshot(self, sess, iter):
         """Take a snapshot of the network after unnormalizing the learned
@@ -100,6 +102,32 @@ class SolverWrapper(object):
         return outside_mul
 
 
+    def runStep(self, sess, ops, datalayer, options, metadata):
+        blobs = datalayer.forward()
+
+        feed_dict = {self.net.data: blobs['data'],
+                     self.net.im_info: blobs['im_info'],
+                     self.net.keep_prob: 0.5,
+                     self.net.gt_boxes: blobs['gt_boxes']}
+
+        return sess.run(ops, feed_dict=feed_dict,
+                        options = options,
+                        run_metadata= metadata)
+
+    def save_summary(self, sess, gs, datalayer):
+        if self.summary_ops == None:
+            self.summary_ops = tf.summary.merge_all()
+
+        if self.summary_writer == None:
+            self.summary_writer = tf.summary.FileWriter(self.output_dir,
+                                                        tf.get_default_graph())
+
+        summary_string = self.runStep(sess, self.summary_ops,
+                                      datalayer,
+                                      None, None)
+        gStep = sess.run(gs)
+        self.summary_writer.add_summary(summary_string, gStep)
+
     def train_model(self, sess, max_iters):
         """Network training loop."""
 
@@ -139,6 +167,10 @@ class SolverWrapper(object):
 
         # final loss
         loss = cross_entropy + loss_box + rpn_cross_entropy + rpn_loss_box
+        tf.summary.scalar('cross_entropy', cross_entropy)
+        tf.summary.scalar('loss_box', loss_box)
+        tf.summary.scalar('rpn_cross_entropy', rpn_cross_entropy)
+        tf.summary.scalar('rpn_cross_box', rpn_loss_box)
 
         # optimizer and learning rate
         global_step = tf.Variable(0, trainable=False)
@@ -157,13 +189,6 @@ class SolverWrapper(object):
         last_snapshot_iter = -1
         timer = Timer()
         for iter in range(max_iters):
-            # get one batch
-            blobs = data_layer.forward()
-
-            # Make one SGD update
-            feed_dict={self.net.data: blobs['data'], self.net.im_info: blobs['im_info'], self.net.keep_prob: 0.5, \
-                           self.net.gt_boxes: blobs['gt_boxes']}
-
             run_options = None
             run_metadata = None
             if cfg.TRAIN.DEBUG_TIMELINE:
@@ -172,10 +197,12 @@ class SolverWrapper(object):
 
             timer.tic()
 
-            rpn_loss_cls_value, rpn_loss_box_value,loss_cls_value, loss_box_value, _ = sess.run([rpn_cross_entropy, rpn_loss_box, cross_entropy, loss_box, train_op],
-                                                                                                feed_dict=feed_dict,
-                                                                                                options=run_options,
-                                                                                                run_metadata=run_metadata)
+            rpn_loss_cls_value, rpn_loss_box_value,loss_cls_value, loss_box_value, _ = self.runStep(sess,
+                                                                                                    [rpn_cross_entropy, rpn_loss_box,
+                                                                                                     cross_entropy, loss_box, train_op],
+                                                                                                    data_layer,
+                                                                                                    run_options,
+                                                                                                    run_metadata)
 
             timer.toc()
 
@@ -189,6 +216,10 @@ class SolverWrapper(object):
                 print 'iter: %d / %d, total loss: %.4f, rpn_loss_cls: %.4f, rpn_loss_box: %.4f, loss_cls: %.4f, loss_box: %.4f, lr: %f'%\
                         (iter+1, max_iters, rpn_loss_cls_value + rpn_loss_box_value + loss_cls_value + loss_box_value ,rpn_loss_cls_value, rpn_loss_box_value,loss_cls_value, loss_box_value, lr.eval())
                 print 'speed: {:.3f}s / iter'.format(timer.average_time)
+
+            if (iter+1) % (cfg.TRAIN.SUMMARY_ITERS) == 0:
+                self.save_summary(sess, global_step,
+                                  data_layer)
 
             if (iter+1) % cfg.TRAIN.SNAPSHOT_ITERS == 0:
                 last_snapshot_iter = iter
