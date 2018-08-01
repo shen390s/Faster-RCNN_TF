@@ -173,6 +173,7 @@ class SolverWrapper(object):
             tf.summary.scalar('loss_box', loss_box)
             tf.summary.scalar('rpn_cross_entropy', rpn_cross_entropy)
             tf.summary.scalar('rpn_cross_box', rpn_loss_box)
+            tf.summary.scalar('Loss', loss)
 
         # optimizer and learning rate
         global_step = tf.Variable(0, trainable=False)
