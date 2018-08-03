@@ -39,8 +39,8 @@ __C.TRAIN.LEARNING_RATE = 0.001
 __C.TRAIN.MOMENTUM = 0.9
 __C.TRAIN.GAMMA = 0.1
 __C.TRAIN.STEPSIZE = 50000
-__C.TRAIN.DISPLAY = 10
-__C.TRAIN.SUMMARY_ITERS = 100
+__C.TRAIN.DISPLAY = 100
+__C.TRAIN.SUMMARY_ITERS = 2000
 __C.IS_MULTISCALE = False
 
 # Scales to compute real features
@@ -54,6 +54,7 @@ __C.IS_MULTISCALE = False
 # Aspect ratio to use during training
 #__C.TRAIN.ASPECTS = (1, 0.75, 0.5, 0.25)
 #__C.TRAIN.ASPECTS= (1,)
+__C.TRAIN.ASPECTS = (0.25,0.5,1,2,4)
 
 
 # Scales to use during training (can list multiple scales)
@@ -91,7 +92,7 @@ __C.TRAIN.BBOX_REG = True
 __C.TRAIN.BBOX_THRESH = 0.5
 
 # Iterations between snapshots
-__C.TRAIN.SNAPSHOT_ITERS = 2000
+__C.TRAIN.SNAPSHOT_ITERS = 5000
 
 # solver.prototxt specifies the snapshot path prefix, this adds an optional
 # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel

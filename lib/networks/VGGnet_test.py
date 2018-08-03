@@ -1,10 +1,12 @@
 import tensorflow as tf
 from networks.network import Network
+from fast_rcnn.config import cfg
 
 # FIXME: change n_classes according data source
 # n_classes = 13
 _feat_stride = [16,]
 anchor_scales = [8, 16, 32] 
+aspects = cfg.TRAIN.ASPECTS
 
 class VGGnet_test(Network):
     def __init__(self, trainable=True, nclasses=13):
@@ -39,17 +41,17 @@ class VGGnet_test(Network):
 
         (self.feed('conv5_3')
              .conv(3,3,512,1,1,name='rpn_conv/3x3')
-             .conv(1,1,len(anchor_scales)*3*2,1,1,padding='VALID',relu = False,name='rpn_cls_score'))
+             .conv(1,1,len(anchor_scales)*len(aspects)*2,1,1,padding='VALID',relu = False,name='rpn_cls_score'))
 
         (self.feed('rpn_conv/3x3')
-             .conv(1,1,len(anchor_scales)*3*4,1,1,padding='VALID',relu = False,name='rpn_bbox_pred'))
+             .conv(1,1,len(anchor_scales)*len(aspects)*4,1,1,padding='VALID',relu = False,name='rpn_bbox_pred'))
 
         (self.feed('rpn_cls_score')
              .reshape_layer(2,name = 'rpn_cls_score_reshape')
              .softmax(name='rpn_cls_prob'))
 
         (self.feed('rpn_cls_prob')
-             .reshape_layer(len(anchor_scales)*3*2,name = 'rpn_cls_prob_reshape'))
+             .reshape_layer(len(anchor_scales)*len(aspects)*2,name = 'rpn_cls_prob_reshape'))
 
         (self.feed('rpn_cls_prob_reshape','rpn_bbox_pred','im_info')
              .proposal_layer(_feat_stride, anchor_scales, 'TEST', name = 'rois'))
