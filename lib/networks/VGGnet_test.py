@@ -5,8 +5,8 @@ from fast_rcnn.config import cfg
 # FIXME: change n_classes according data source
 # n_classes = 13
 _feat_stride = [16,]
-anchor_scales = [8, 16, 32] 
 aspects = cfg.TRAIN.ASPECTS
+anchor_scales = cfg.TRAIN.ANCHOR_SCALES
 
 class VGGnet_test(Network):
     def __init__(self, trainable=True, nclasses=13):

@@ -54,7 +54,8 @@ __C.IS_MULTISCALE = False
 # Aspect ratio to use during training
 #__C.TRAIN.ASPECTS = (1, 0.75, 0.5, 0.25)
 #__C.TRAIN.ASPECTS= (1,)
-__C.TRAIN.ASPECTS = (0.25,0.5,1,2,4)
+__C.TRAIN.ASPECTS = (0.5,1,2)
+__C.TRAIN.ANCHOR_SCALES = (4,8,16,32, 64)
 
 
 # Scales to use during training (can list multiple scales)
