@@ -30,12 +30,15 @@ CLASSES = ('__background__', # always index 0
 def vis_detections(im, class_name, dets,ax, thresh=0.5):
     """Draw detected bounding boxes."""
     inds = np.where(dets[:, -1] >= thresh)[0]
+
     if len(inds) == 0:
         return
 
     for i in inds:
         bbox = dets[i, :4]
         score = dets[i, -1]
+
+        print 'class: %s bbox: %r score: %r' % (class_name, bbox, score)
 
         ax.add_patch(
             plt.Rectangle((bbox[0], bbox[1]),
@@ -135,7 +138,8 @@ if __name__ == '__main__':
     # init session
     sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
     # load network
-    net = get_network(args.demo_net, len(CLASSES))
+    # net = get_network(args.demo_net, len(CLASSES))
+    net = get_network(args.demo_net, imdb.num_classes)
     # load model
     saver = tf.train.Saver(write_version=tf.train.SaverDef.V1)
     saver.restore(sess, args.model)
