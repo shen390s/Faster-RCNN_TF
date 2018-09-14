@@ -32,13 +32,15 @@ def vis_detections(im, class_name, dets,ax, thresh=0.5):
     inds = np.where(dets[:, -1] >= thresh)[0]
 
     if len(inds) == 0:
-        return
+        return 0
 
+    n = 0
     for i in inds:
         bbox = dets[i, :4]
         score = dets[i, -1]
 
-        print 'class: %s bbox: %r score: %r' % (class_name, bbox, score)
+        # print 'class: %s bbox: %r score: %r' % (class_name, bbox, score)
+        n = n + 1
 
         ax.add_patch(
             plt.Rectangle((bbox[0], bbox[1]),
@@ -58,6 +60,8 @@ def vis_detections(im, class_name, dets,ax, thresh=0.5):
     plt.axis('off')
     plt.tight_layout()
     plt.draw()
+
+    return n
 
 
 def demo(sess, net, image_name, classes=CLASSES):
@@ -83,6 +87,7 @@ def demo(sess, net, image_name, classes=CLASSES):
 
     CONF_THRESH = 0.8
     NMS_THRESH = 0.3
+    nobjs = 0
     for cls_ind, cls in enumerate(classes[1:]):
         cls_ind += 1 # because we skipped background
         cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
@@ -91,7 +96,9 @@ def demo(sess, net, image_name, classes=CLASSES):
                           cls_scores[:, np.newaxis])).astype(np.float32)
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
-        vis_detections(im, cls, dets, ax, thresh=CONF_THRESH)
+        nobjs = nobjs + vis_detections(im, cls, dets, ax, thresh=CONF_THRESH)
+
+    print '%d objects detected' % (nobjs)
 
 def parse_args():
     """Parse input arguments."""
