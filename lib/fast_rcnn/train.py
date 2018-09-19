@@ -122,6 +122,7 @@ class SolverWrapper(object):
             self.summary_writer = tf.summary.FileWriter(self.output_dir,
                                                         tf.get_default_graph())
 
+        print 'Saving summaries...'
         summary_string = self.runStep(sess, self.summary_ops,
                                       datalayer,
                                       None, None)
@@ -168,17 +169,20 @@ class SolverWrapper(object):
         # final loss
         loss = cross_entropy + loss_box + rpn_cross_entropy + rpn_loss_box
 
+        # learning rate
+        global_step = tf.Variable(0, trainable=False)
+        lr = tf.train.exponential_decay(cfg.TRAIN.LEARNING_RATE, global_step,
+                                        cfg.TRAIN.STEPSIZE, 0.9, staircase=True)
+
         with tf.name_scope('Loss'):
             tf.summary.scalar('cross_entropy', cross_entropy)
             tf.summary.scalar('loss_box', loss_box)
             tf.summary.scalar('rpn_cross_entropy', rpn_cross_entropy)
             tf.summary.scalar('rpn_cross_box', rpn_loss_box)
             tf.summary.scalar('Loss', loss)
+            tf.summary.scalar('Learning_rate', lr)
 
         # optimizer and learning rate
-        global_step = tf.Variable(0, trainable=False)
-        lr = tf.train.exponential_decay(cfg.TRAIN.LEARNING_RATE, global_step,
-                                        cfg.TRAIN.STEPSIZE, 0.9, staircase=True)
         momentum = cfg.TRAIN.MOMENTUM
         train_op = tf.train.MomentumOptimizer(lr, momentum).minimize(loss, global_step=global_step)
 
