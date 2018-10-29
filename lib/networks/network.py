@@ -154,6 +154,7 @@ class Network(object):
                                       pooled_width,
                                       spatial_scale,
                                       name=name)[0]
+        output = tf.reshape(output, [-1, pooled_height, pooled_width, 512])
         print "RoI output =", output
         return output
 

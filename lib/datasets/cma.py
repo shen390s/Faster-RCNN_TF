@@ -54,7 +54,7 @@ def get_class_list_from_ann_file(filename):
     annotations = recursive_parse_xml_to_dict(xml)['annotation']
     if annotations.has_key('object'):
         for obj in annotations['object']:
-            classes.append(obj['name'])
+            classes.append(obj['name'].lower())
 
     return list(set(classes))
 
